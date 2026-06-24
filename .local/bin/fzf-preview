@@ -1,0 +1,109 @@
+#!/usr/bin/env bash
+
+# Configuration
+CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/fzf-preview"
+mkdir -p "$CACHE_DIR"
+
+FILE="$1"
+if [[ -z "$FILE" ]]; then exit 0; fi
+
+# --- Dimension Detection ---
+COLS="${FZF_PREVIEW_COLUMNS:-80}"
+LINES="${FZF_PREVIEW_LINES:-24}"
+
+# --- Tool Check ---
+MAGICK=""
+command -v magick >/dev/null 2>&1 && MAGICK="magick"
+command -v convert >/dev/null 2>&1 && [[ -z "$MAGICK" ]] && MAGICK="convert"
+
+# --- Helper: Scaled Image Rendering ---
+render_scaled_image() {
+    local img="$1"
+    if [[ -n "$KITTY_WINDOW_ID" ]]; then
+        local target_w=$((COLS * 20))
+        local target_h=$((LINES * 40))
+        local thumb="$CACHE_DIR/scaled_$(basename "$img")"
+
+        if [[ -n "$MAGICK" ]]; then
+            # Use higher density multipliers to ensure high-quality scaling in the terminal
+            $MAGICK "$img" -resize "${target_w}x${target_h}>" "$thumb" 2>/dev/null
+            img="$thumb"
+        fi
+
+        kitty icat --clear --transfer-mode=memory --unicode-placeholder --stdin=no \
+            --place="${COLS}x${LINES}@0x0" "$img"
+    fi
+}
+
+# --- File Processing ---
+MIME=$(file -bL --mime-type "$FILE")
+CATEGORY="${MIME%%/*}"
+KIND="${MIME##*/}"
+
+if [[ -d "$FILE" ]]; then
+    eza --icons --color=always --group-directories-first --time-style=long-iso -l "$FILE" | sed -E 's/^([^ ]+ +){5}//'
+
+# 1. Office Documents
+elif [[ "$MIME" == *"presentationml.presentation"* ]]; then
+    # Extract slide IDs and iterate through them to provide structure (Slide Headers)
+    slides=$(unzip -l "$FILE" "ppt/slides/*.xml" 2>/dev/null | grep -oE 'ppt/slides/[^ ]+\.xml' | sed 's|ppt/slides/||;s|\.xml||')
+    if [[ -n "$slides" ]]; then
+        for slide in $slides; do
+            echo "--- Slide: $slide ---"
+            untemp=$(unzip -p "$FILE" "ppt/slides/$slide.xml" 2>/dev/null | sed -E 's/<[^>]+>//g' | grep -v '^$' | fmt -w "$COLS")
+            if [[ -n "$untemp" ]]; then
+                echo "$untemp"
+                echo "" # Spacer between slides
+            fi
+        done | head -n $(($LINES * 2)) | bat --color=always -
+    else
+        # Fallback to pandoc if the zip structure isn't as expected
+        pandoc -t plain "$FILE" 2>/dev/null | bat --color=always -
+    fi
+elif [[ "$MIME" == "application/vnd.openxmlformats-officedocument*" ]] && command -v pandoc >/dev/null 2>&1; then
+    pandoc -t plain "$FILE" | bat --color=always -
+
+# 2. Images
+elif [[ "$CATEGORY" == "image" ]]; then
+    render_scaled_image "$FILE"
+    if command -v exiftool >/dev/null 2>&1; then
+        exiftool "$FILE" | bat --color=always -plyyaml
+    fi
+
+# 3. PDFs
+elif [[ "$KIND" == "pdf" ]]; then
+    THUMB="$CACHE_DIR/pdf_$(basename "$FILE").jpg"
+    if command -v pdftoppm >/dev/null 2>&1; then
+        pdftoppm -f 1 -l 1 -scale-to 1920 -jpeg -singlefile "$FILE" "$THUMB" >/dev/null 2>&1
+        [[ -f "$THUMB.jpg" ]] && mv "$THUMB.jpg" "$THUMB"
+        [[ -f "$THUMB" ]] && render_scaled_image "$THUMB"
+    else
+        bat --color=always "$FILE"
+    fi
+
+# 4. Videos
+elif [[ "$CATEGORY" == "video" ]]; then
+    THUMB="$CACHE_DIR/video_$(basename "$FILE").jpg"
+    if command -v ffmpegthumbnailer >/dev/null 2>&1; then
+        ffmpegthumbnailer -i "$FILE" -s 1024 -o "$THUMB" >/dev/null 2>&1
+        [[ -f "$THUMB" ]] && render_scaled_image "$THUMB"
+    else
+        echo "Video thumbnailer (ffmpegthumbnailer) not found."
+    fi
+
+# 5. Binary Files (.bin, .dat, etc.)
+elif [[ "$MIME" == "application/octet-stream" ]] || [[ "$KIND" == "bin" ]]; then
+    hexdump -C "$FILE" | head -n $(($LINES * 2)) | bat --color=always -
+
+# 6. Text Files
+elif [[ "$CATEGORY" == "text" ]] || [[ "$KIND" == "plain" ]]; then
+    bat --color=always "$FILE"
+
+# 7. Fallback (using lesspipe)
+else
+    if command -v lesspipe.sh >/dev/null 2>&1; then
+        lesspipe.sh "$FILE" | bat --color=always -
+    else
+        bat --color=always "$FILE"
+    fi
+fi

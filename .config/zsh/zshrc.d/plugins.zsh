@@ -1,0 +1,4 @@
+# Plugins
+source /usr/share/zsh/plugins/fzf-tab-source/fzf-tab.plugin.zsh
+source /usr/share/zsh/plugins/zsh-autosuggestions/zsh-autosuggestions.plugin.zsh
+source /usr/share/zsh/plugins/zsh-syntax-highlighting/zsh-syntax-highlighting.plugin.zsh

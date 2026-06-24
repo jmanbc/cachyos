@@ -1,0 +1,150 @@
+{
+  "$schema": "https://raw.githubusercontent.com/JanDeDobbeleer/oh-my-posh/main/themes/schema.json",
+  "palette": {
+    "base": "#12121a",
+    "mantle": "#12121a",
+    "crust": "#12121a",
+    "text": "#ffffff",
+    "subtext0": "#cdd6f4",
+    "surface0": "#1e1e2e",
+    "surface1": "#313244",
+    "overlay0": "#6c7086",
+    "blue": "#00ffff",
+    "lavender": "#b4befe",
+    "sapphire": "#74c7ec",
+    "sky": "#89dceb",
+    "teal": "#94e2d5",
+    "green": "#a6e3a1",
+    "neon_green": "#39FF14",
+    "yellow": "#f9e2af",
+    "peach": "#fab3_87",
+    "maroon": "#f38ba8",
+    "red": "#ff00ff",
+    "mauve": "#cba6f7",
+    "pink": "#ff00ff",
+    "flamingo": "#f2cdcd",
+    "rosewater": "#f5e0dc"
+  },
+  "transient_prompt": {
+    "template": "<p:blue>❯",
+    "foreground": "transparent",
+    "background": "transparent"
+  },
+  "blocks": [
+    {
+      "type": "prompt",
+      "alignment": "left",
+      "segments": [
+        {
+          "properties": {
+            "alpine": "\uf300",
+            "arch": "\uf303",
+            "centos": "\uf304",
+            "debian": "\uf306",
+            "fedora": "\uf30a",
+            "linux": "\ue712",
+            "macos": "\ue711",
+            "manjaro": "\uf312",
+            "ubuntu": "\uf31c",
+            "windows": "\ue62a",
+            "wsl": "\ue712"
+          },
+          "style": "plain",
+          "template": " {{ if .WSL }}WSL at {{ end }}{{.Icon}}  ",
+          "foreground": "p:text",
+          "background": "p:surface0",
+          "type": "os"
+        },
+        {
+          "properties": {
+            "folder_icon": "\ue5fe",
+            "folder_separator_icon": "<p:blue> \ue0bb </>",
+            "home_icon": "\ueb06",
+            "style": "agnoster"
+          },
+          "style": "plain",
+          "template": " {{ .Path }} ",
+          "foreground": "p:blue",
+          "background": "p:surface1",
+          "type": "path"
+        },
+        {
+          "properties": {
+            "fetch_stash_count": true,
+            "fetch_status": true,
+            "branch_icon": "\ue725 ",
+            "cherry_pick_icon": "\ue29b ",
+            "commit_icon": "\uf417 ",
+            "merge_icon": "\ue727 ",
+            "no_commits_icon": "\uf0c3 ",
+            "rebase_icon": "\ue728 ",
+            "revert_icon": "\uf0e2 ",
+            "tag_icon": "\uf412 "
+          },
+          "style": "plain",
+          "template": "<p:base>\ue0b1 </><p:green>{{ .HEAD }}{{ if .Staging.Changed }}<p:peach> \uf046 {{ .Staging.String }}</>{{ end }}{{ if and (.Working.Changed) (.Staging.Changed) }} |{{ end }}{{ if .Working.Changed }} \uf044 {{ .Working.String }}{{ end }}{{ if gt .StashCount 0 }} \ueb4b {{ .StashCount }}{{ end }} </>",
+          "foreground": "p:green",
+          "background": "p:surface1",
+          "type": "git"
+        },
+        {
+          "properties": {
+            "style": "dallas",
+            "threshold": 0
+          },
+          "style": "diamond",
+          "trailing_diamond": "\ue0b0",
+          "template": "<p:base>\ue0b1 </><p:subtext0>{{ .FormattedMs }}s </>",
+          "foreground": "p:text",
+          "background": "p:surface1",
+          "type": "executiontime"
+        }
+      ]
+    },
+    {
+      "type": "prompt",
+      "alignment": "right",
+      "segments": [
+        {
+          "style": "diamond",
+          "leading_diamond": "\ue0b2",
+          "template": " {{ if .SSHSession}}\ueba9 {{ end }}{{ .UserName }}<transparent> / </>{{ .HostName }}",
+          "foreground": "p:blue",
+          "background": "p:surface1",
+          "type": "session"
+        },
+        {
+          "properties": {
+            "time_format": "15:04:05"
+          },
+          "style": "diamond",
+          "template": "<p:base> \ue31e\uf0fb </><p:mauve>{{ .CurrentDate | date .Format }} </>",
+          "foreground": "p:mauve",
+          "background": "p:surface1",
+          "type": "time"
+        }
+      ]
+    },
+    {
+      "type": "prompt",
+      "alignment": "left",
+      "segments": [
+        {
+          "properties": {
+            "always_enabled": true
+          },
+          "style": "plain",
+          "template": "\uf432 ",
+          "foreground": "p:neon_green",
+          "foreground_templates": [],
+          "background": "transparent",
+          "type": "status"
+        }
+      ],
+      "newline": true
+    }
+  ],
+  "version": 4,
+  "final_space": true,
+  "auto_upgrade": false
+}
