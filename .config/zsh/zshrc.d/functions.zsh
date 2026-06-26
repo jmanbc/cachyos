@@ -42,11 +42,15 @@ command_not_found_handler() {
   return 127
 }
 
-# Helpers & Functions
+#Package Cleanup
 cleanup() {
   print "🧹 Initiating cleanup protocol, sir!"
+  
+  # The (N) tells Zsh: "If no files match, don't error out, just do nothing."
+  sudo rm -f /var/cache/pacman/pkg/download-* (N) 2>/dev/null
+
   sudo pacman -Sc --noconfirm
-  sudo rm -f -r /var/cache/pacman/pkg/download-*
+  
   local orphans=$(pacman -Qtdq 2>/dev/null)
   if [[ -n $orphans ]]; then
     print -P "%F{yellow}⚠️  Orphans detected:%f\n$orphans"
@@ -57,11 +61,13 @@ cleanup() {
   fi
 }
 
+#Edit paru package files
 paruedit() {
   [[ -z "$1" ]] && { print "Usage: paruedit <package>"; return 1; }
   paru -S "$1" --fm nvim
 }
 
+#Editing files with sudo
 sudo() {
   case "$1" in
     nvim|vim|vi|nano) local editor="$1"; shift; SUDO_EDITOR="$editor" sudoedit "$@" ;;
@@ -69,6 +75,7 @@ sudo() {
   esac
 }
 
+#System Info
 sysinfo() {
   print -P "\n%F{cyan}=== SYSTEM HEALTH ===%f"
   cpu
