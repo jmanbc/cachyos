@@ -46,3 +46,4 @@ for module in $HOME/.config/zsh/zshrc.d/*.zsh; do
         source "$module"
     fi
 done
+
