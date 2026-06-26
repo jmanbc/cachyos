@@ -27,16 +27,16 @@ bindkey -v
 bindkey '^?' backward-delete-char
 bindkey '^H' backward-delete-char
 
-# --- CLIPBOARD UTILITIES (SILENT) ---
+# --- CLIPBOARD UTILITIES ---
 
-# 1. Copy function (Silent)
+# 1. Copy function
 copy-line-to-clipboard() {
     echo -n "$BUFFER" | wl-copy
     zle reset-prompt
 }
 zle -N copy-line-to-clipboard
 
-# 2. Cut function (Silent)
+# 2. Cut function
 cut-line-to-clipboard() {
     echo -n "$BUFFER" | wl-copy
     BUFFER=""
@@ -46,6 +46,4 @@ zle -N cut-line-to-clipboard
 
 # --- BINDINGS ---
 bindkey -M vicmd 'y' copy-line-to-clipboard
-bindkey -M viins 'y' copy-line-to-clipboard
 bindkey -M vicmd 'x' cut-line-to-clipboard
-bindkey -M viins 'x' cut-line-to-clipboard

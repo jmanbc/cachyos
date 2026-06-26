@@ -153,6 +153,54 @@ require("lazy").setup({
       })
     end,
   },
+
+  -- Treesitter: For advanced syntax highlighting and structural parsing
+  {
+    "nvim-treesitter/nvim-treesitter",
+    build = ":TSUpdate",
+    event = { "BufReadPost", "BufNewFile" },
+    config = function()
+      local status, ts = pcall(require, "nvim-treesitter.configs")
+      if not status then
+        status, ts = pcall(require, "nvim-treesitter")
+      end
+
+      if status then
+        ts.setup({
+          ensure_installed = { "lua", "vim", "vimdoc", "python", "javascript", "typescript" },
+          highlight = { enable = true },
+          indent = { enable = true },
+        })
+      end
+    end,
+  },
+
+  -- Neo-tree: For directory browsing (The file explorer you need)
+  {
+    "nvim-neo-tree/neo-tree.nvim",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      "nvim-tree/nvim-web-devicons",
+      "MunifTanjim/nui.nvim",
+    },
+    config = function()
+      require("neo-tree").setup({
+        filesystem = {
+          filtered_items = {
+            visible = true, -- This makes hidden (dot) files visible by default
+            hide_dotfiles = false,
+            hide_gitignored = false,
+          },
+          presentation = {
+            mappings = {
+              "<space>",
+              "s",
+            },
+          },
+        },
+      })
+    end,
+  },
 }, {
   ui = { border = "rounded" },
 })
