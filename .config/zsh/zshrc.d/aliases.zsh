@@ -26,7 +26,7 @@ alias riplatest='expac --timefmt='\''%Y-%m/d %T'\'' '\''%l\t%n %v'\'' | sort | t
 alias ripall='expac --timefmt='\''%Y-%m/d %T'\'' '\''%l\t%n %v'\'' | sort | nl'
 
 # Steam/Gaming
-alias steamhdr='gamescope -W 3440 -H 1440 -r 165 -f -e --hdr-enabled --mangoapp -- steam -steamos3'
+alias steamhdr='gamescope -W 3440 -H 1440 -r 165 -f -e --hdr-enabled --force-grab-cursor --mangoapp -- steam -steamos3'
 
 # File Listing (Eza)
 alias lsa='eza -lahF --color=always --icons --sort=size --group-directories-first'
