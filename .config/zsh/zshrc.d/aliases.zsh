@@ -35,3 +35,6 @@ alias lst='eza -lahfT --color=always --icons --sort=size --group-directories-fir
 
 # Zoxide Integration
 command -v zoxide >/dev/null 2>&1 && alias cd='z'
+
+# Elite Dangerous
+alias opentrack='protontricks-launch --appid 359320 /mnt/storage/SteamLibrary/steamapps/compatdata/359320/pfx/drive_c/Program\ Files\ \(x86\)/opentrack/opentrack.exe'

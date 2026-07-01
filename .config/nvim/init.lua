@@ -1,13 +1,12 @@
 -- ~/.config/nvim/init.lua
 
--- 1. Basic Options (Same as before)
+-- 1. Basic Options
 local opt = vim.opt
 opt.number = true
-opt.relativenumber = false  -- Static numbers
+opt.relativenumber = true
 opt.cursorline = true
 opt.wrap = false
 opt.signcolumn = "yes"
-opt.scrolloff = 8
 opt.tabstop = 4
 opt.shiftwidth = 4
 opt.expandtab = true
@@ -22,55 +21,27 @@ opt.clipboard = "unnamedplus"
 -- 2. Initialize lazy.nvim
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.loop.fs_stat(lazypath) then
-  vim.fn.system({ "git", "clone", "--filter=blob:none", "https://github.com/folke/lazy.nvim.git", "--branch=stable", lazypath })
+  vim.fn.system({ "git", "cmp", "clone", "--filter=blob:none", "https://github.com/folke/lazy.nvim.git", "--branch=stable", lazypath })
 end
 vim.opt.rtp:prepend(lazypath)
 
 -- 3. Plugin Configuration
 require("lazy").setup({
-  -- Aesthetic: Catppuccin (Customized for Sweet KDE Ultra Dark)
+  -- Aesthetic: Catppuccin
   {
     "catppuccin/nvim",
     name = "catppuccin",
-    lazy = false,
     priority = 1000,
     config = function()
       require("catppuccin").setup({
         flavour = "mocha",
         transparent_background = true,
-        term_colors = true,
-        integrations = {
-          cmp = true,
-          gitsigns = true,
-          lualine = true,
-          treesitter = true,
-          notify = true,
-          mini = {
-            enabled = true,
-            indentscope_color = "",
-          },
-        },
-        custom_highlights = function(colors)
-          return {
-            -- Deep background for the main editor
-            Normal = { bg = "#12121a" },
-            NormalFloat = { bg = "#08080c" },
-            -- Neon Accents (Sweet KDE style)
-            Keyword = { fg = "#ff79c6" },   -- Neon Pink
-            Function = { fg = "#8be9fd" },  -- Neon Cyan
-            String = { fg = "#bd93f9" },    -- Neon Purple
-            Comment = { fg = "#6272a4", italic = true },
-            -- UI Borders & Accents
-            FloatBorder = { fg = "#ff79c6" },
-            CursorLine = { bg = "#1e1e2e" },
-          }
-        end,
       })
       vim.cmd.colorscheme("catppuccin")
     end,
   },
 
-  -- The Core: Autocompletion (nvim-cmp)
+  -- Autocompletion (nvim-cmp)
   {
     "hrsh7th/nvim-cmp",
     event = "InsertEnter",
@@ -84,7 +55,6 @@ require("lazy").setup({
     config = function()
       local cmp = require("cmp")
       local luasnip = require("luasnip")
-
       cmp.setup({
         snippet = {
           expand = function(args)
@@ -92,25 +62,13 @@ require("lazy").setup({
           end,
         },
         mapping = cmp.mapping.preset.insert({
-          ["<C-b>"] = cmp.mapping.scroll_docs(-4),
-          ["<C-f>"] = cmp.mapping.scroll_docs(4),
           ["<C-Space>"] = cmp.mapping.complete(),
-          ["<C-e>"] = cmp.mapping.abort(),
           ["<CR>"] = cmp.mapping.confirm({ select = true }),
           ["<Tab>"] = cmp.mapping(function(fallback)
             if cmp.visible() then
               cmp.select_next_item()
             elseif luasnip.expand_or_jumpable() then
               luasnip.expand_or_jump()
-            else
-              fallback()
-            end
-          end, { "i", "s" }),
-          ["<S-Tab>"] = cmp.mapping(function(fallback)
-            if cmp.visible() then
-              cmp.select_prev_item()
-            elseif luasnip.jumpable(-1) then
-              luasnip.jump(-1)
             else
               fallback()
             end
@@ -123,38 +81,43 @@ require("lazy").setup({
         }, {
           { name = "buffer" },
         }),
-        window = {
-          completion = cmp.config.window.bordered({
-            border = "rounded",
-            winhighlight = "Normal:Normal,FloatBorder:FloatBorder,CursorLine:PmenuSel,Search:None",
-          }),
-        },
       })
     end,
   },
 
-  -- LSP Server
+  -- LSP Support
   {
     "neovim/nvim-lspconfig",
     event = "BufReadPre",
     config = function()
       local lspconfig = require("lspconfig")
-      -- Example: lspconfig.pyright.setup{}
+      -- Add server setups here as needed
     end,
   },
   
-  -- Status Line (Catppuccin compatible)
+  -- Status Line (Lualine)
   {
     "nvim-lualine/lualine.nvim",
     dependencies = { "nvim-tree/nvim-web-devicons" },
     config = function()
       require("lualine").setup({
-        options = { theme = "auto" },
+        options = {
+          theme = "auto",
+          component_separators = "|",
+          section_separators = "",
+        },
+        sections = {
+          lualine_a = { "mode" },
+          lualine_b = { "branch", "diagnostics" },
+          lualine_c = { { function() return vim.fn.expand("%:t") end } },
+          lualine_x = { "encoding", "filetype" },
+          lualine_z = { "location" },
+        },
       })
     end,
   },
 
-  -- Treesitter: For advanced syntax highlighting and structural parsing
+  -- Treesitter (Syntax Highlighting)
   {
     "nvim-treesitter/nvim-treesitter",
     build = ":TSUpdate",
@@ -164,10 +127,9 @@ require("lazy").setup({
       if not status then
         status, ts = pcall(require, "nvim-treesitter")
       end
-
       if status then
         ts.setup({
-          ensure_installed = { "lua", "vim", "vimdoc", "python", "javascript", "typescript" },
+          ensure_installed = { "lua", "vim", "vimdoc", "python", "javascript" },
           highlight = { enable = true },
           indent = { enable = true },
         })
@@ -175,7 +137,7 @@ require("lazy").setup({
     end,
   },
 
-  -- Neo-tree: For directory browsing (The file explorer you need)
+  -- Neo-tree (File Explorer)
   {
     "nvim-neo-tree/neo-tree.nvim",
     dependencies = {
@@ -184,23 +146,9 @@ require("lazy").setup({
       "MunifTanjim/nui.nvim",
     },
     config = function()
-      require("neo-tree").setup({
-        filesystem = {
-          filtered_items = {
-            visible = true, -- This makes hidden (dot) files visible by default
-            hide_dotfiles = false,
-            hide_gitignored = false,
-          },
-          presentation = {
-            mappings = {
-              "<space>",
-              "s",
-            },
-          },
-        },
-      })
+      require("neo-tree").setup({ filesystem = { filtered_items = { hide_dotfiles = false } } })
     end,
   },
-}, {
-  ui = { border = "rounded" },
 })
+
+
