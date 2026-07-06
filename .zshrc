@@ -47,3 +47,4 @@ for module in $HOME/.config/zsh/zshrc.d/*.zsh; do
     fi
 done
 
+
