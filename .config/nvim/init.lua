@@ -149,6 +149,11 @@ require("lazy").setup({
       require("neo-tree").setup({ filesystem = { filtered_items = { hide_dotfiles = false } } })
     end,
   },
-})
 
+  -- Cursor Animation
+  {
+    "sphamba/smear-cursor.nvim",
+    opts = {},
+  },
+})
 

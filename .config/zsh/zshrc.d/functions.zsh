@@ -45,9 +45,12 @@ command_not_found_handler() {
 #Package Cleanup
 cleanup() {
   print "🧹 Initiating cleanup protocol, sir!"
-  
-  # The (N) tells Zsh: "If no files match, don't error out, just do nothing."
-  sudo rm -f /var/cache/pacman/pkg/download-* (N) 2>/dev/null
+
+  if sudo find /var/cache/pacman/pkg/ -name "download-*" -delete 2>/dev/null; then
+    print "🗑️  Temporary downloads cleared."
+  fi
+
+  sleep 1
 
   sudo pacman -Sc --noconfirm
   
@@ -59,12 +62,6 @@ cleanup() {
   else
     print -P "%F{green}✅ No orphans. System clean.%f"
   fi
-}
-
-#Edit paru package files
-paruedit() {
-  [[ -z "$1" ]] && { print "Usage: paruedit <package>"; return 1; }
-  paru -S "$1" --fm nvim
 }
 
 #Editing files with sudo
