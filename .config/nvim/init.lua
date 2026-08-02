@@ -155,5 +155,24 @@ require("lazy").setup({
     "sphamba/smear-cursor.nvim",
     opts = {},
   },
-})
 
+  -- Jump Configuration
+  {"folke/flash.nvim",
+  event = "VeryLazy",
+  opts = {},
+  -- stylua: ignore
+  keys = {
+      { "zk",   mode = { "n", "x", "o" }, function() require ("flash").jump() end,      desc = "Flash" },
+    }
+  },
+
+  -- Colorizer
+  {"norcalli/nvim-colorizer.lua",
+  config = function()
+    require ("colorizer").setup({
+        "*",
+        css = { rbg_fn = true },
+    })
+   end,
+   }
+})
