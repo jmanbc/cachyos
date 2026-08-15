@@ -174,5 +174,5 @@ require("lazy").setup({
         css = { rbg_fn = true },
     })
    end,
-   }
-})
+   },
+ })
